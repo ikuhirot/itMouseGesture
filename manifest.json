@@ -1,0 +1,41 @@
+{
+    "name": "itMouseGesture",
+    "description": "右クリック + 下移動 + 右移動のジェスチャーで現在のタブを閉じる拡張機能",
+    "version": "0.0.1",
+    "author": "ikuhirot",
+    "manifest_version": 3,
+    "permissions": [
+        "tabs",
+        "activeTab"
+    ],
+
+    "icons": {
+        "16": "icons/logo-16.png",
+        "32": "icons/logo-32.png",
+        "48": "icons/logo-48.png",
+        "128": "icons/logo-128.png"
+    },
+    "background": {
+        "service_worker": "service_worker.js"
+    },
+    "content_scripts":[
+        {
+            "matches": ["<all_urls>"],
+            "css": ["css/content_script.css"],
+            "js": ["scripts/content_script.js"],
+            "run_at": "document_start"
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "icons/arrow-up.png",
+                "icons/arrow-down.png",
+                "icons/arrow-right.png",
+                "icons/arrow-left.png",
+                "css/content_script.css"
+            ],
+            "matches": ["<all_urls>"]
+        }
+    ]
+}
