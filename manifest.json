@@ -1,7 +1,7 @@
 {
     "name": "itMouseGesture",
-    "description": "右クリック + 下移動 + 右移動のジェスチャーで現在のタブを閉じる拡張機能",
-    "version": "0.0.1",
+    "description": "A simple and safe browser extension that executes actions by recognizing mouse gestures such as right-click and directional movement.",
+    "version": "1.0.0",
     "author": "ikuhirot",
     "manifest_version": 3,
     "permissions": [
@@ -22,18 +22,19 @@
         {
             "matches": ["<all_urls>"],
             "css": ["css/content_script.css"],
-            "js": ["scripts/content_script.js"],
+            "js": [
+                "scripts/gesture_recognizer-lib.js",
+                "scripts/overlay-lib.js",
+                "scripts/content_script.js"
+            ],
             "run_at": "document_start"
         }
     ],
     "web_accessible_resources": [
         {
             "resources": [
-                "icons/arrow-up.png",
-                "icons/arrow-down.png",
-                "icons/arrow-right.png",
-                "icons/arrow-left.png",
-                "css/content_script.css"
+                "icons/*.png",
+                "config/gestures.json"
             ],
             "matches": ["<all_urls>"]
         }

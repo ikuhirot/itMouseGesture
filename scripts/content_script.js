@@ -1,81 +1,75 @@
-let gestureState = 0;
-let startX = 0;
-let startY = 0;
-const minDistance = 30;     // Minimum distance in pixel to detect mouse move
+let gestureBuffer = [];
+const maxBufferSize = 10;   // Maximum number of mouse moves to store in the buffer
+let isRightClicking = false;
+let lastX = 0;
+let lastY = 0;
+let suppressContextMenu = false;     // Suppress context menu on right click
+const threshold = 30;       // Minimum distance in pixel to detect mouse move
 
-// Load CSS if not
-// function insertOverlayCSS() {
-//     if (!document.getElementById('overlay-css')) {
-//         const link = document.createElement('link');
-//         link.id = 'overlay-css';
-//         link.rel = 'stylesheet';
-//         link.href = chrome.runtime.getURL('css/content_script.css');
-//         document.head.appendChild(link);
-//     }
-// }
+window.overlayLib.initImageCache();
+window.gestureRecognizerLib.loadGestureDefinitions(() => {
+    console.log("Gesture definitions loaded");
+});
 
-// Function to display overlay image
-function showOverlay(imgUrl) {
-    // If any image is displayed, remove first to replace it
-    removeOverlay();
-    // insertOverlayCSS();
-
-    const overlay = document.createElement('div');
-    overlay.id = 'gesture-overlay';
-
-    const img = document.createElement('img');
-    img.src = imgUrl;
-
-    overlay.appendChild(img);
-    document.body.appendChild(overlay);
-}
-
-// Function to remove overlay image
-function removeOverlay() {
-    const existingOverlay = document.getElementById('gesture-overlay');
-    if (existingOverlay) {
-        existingOverlay.remove();
+// Suppress the context menu
+window.addEventListener("contextmenu", (e) => {
+    if (suppressContextMenu) {
+        e.preventDefault();
+        suppressContextMenu = false;    // Reset the flag
     }
-}
+});
 
 // Detect right click down, initialize status
-window.addEventListener('mousedown', (e) => {
+window.addEventListener("mousedown", (e) => {
     if (e.button === 2) { // right click
         // console.log("right click down detected");
-        gestureState = 1;
-        startX = e.clientX;
-        startY = e.clientY;
+        isRightClicking = true;
+        gestureBuffer = [];
+        lastX = e.clientX;
+        lastY = e.clientY;
     }
 });
 
 // Monitor mouse move while right click down
-window.addEventListener('mousemove', (e) => {
-    if (gestureState === 1) {
-        if (e.clientY - startY >= minDistance) { // move down
-            gestureState = 2;
-            // console.log("move down detected");
-            const imgUrl = chrome.runtime.getURL("icons/arrow-down.png");
-            showOverlay(imgUrl);
-            startX = e.clientX;
-            startY = e.clientY;
+window.addEventListener("mousemove", (e) => {
+    if (!isRightClicking) return;
+
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+
+    if (Math.abs(dx) >= threshold || Math.abs(dy) >= threshold) {
+        // console.log(`Mouse moved: dx=${dx}, dy=${dy}`);
+        let dir;
+        if (Math.abs(dx) > Math.abs(dy)) {
+            dir = dx > 0 ? window.overlayLib.DIRECTION.RIGHT : window.overlayLib.DIRECTION.LEFT;
+        } else {
+            dir = dy > 0 ? window.overlayLib.DIRECTION.DOWN : window.overlayLib.DIRECTION.UP;
         }
-    } else if (gestureState === 2) {
-        if (e.clientX - startX >= minDistance) { // move right
-            gestureState = 3;
-            // console.log("move right detected");
-            const imgUrl = chrome.runtime.getURL("icons/arrow-right.png");
-            showOverlay(imgUrl);
+
+        if (gestureBuffer.length < maxBufferSize) {
+            if (gestureBuffer.length === 0 || gestureBuffer.at(-1) !== dir) {   // Only add if it's a new direction
+                gestureBuffer.push(dir);
+                window.overlayLib.showOverlay(gestureBuffer);
+            }
         }
+
+        lastX = e.clientX;
+        lastY = e.clientY;
     }
 });
 
 // Detect right click release (up)
-window.addEventListener('mouseup', (e) => {
-    if (gestureState === 3 && e.button === 2) {
+window.addEventListener("mouseup", (e) => {
+    if (e.button === 2) {
         // console.log("mouse gesture detected");
-        chrome.runtime.sendMessage({ type: "closeTab" });
+        const res = window.gestureRecognizerLib.recognizeGesture(gestureBuffer);
+        if (res) {
+            suppressContextMenu = true;     // Suppress context menu if a gesture is recognized
+        }
+
+        // Reset the status
+        window.overlayLib.removeOverlay();
+        gestureBuffer = [];
+        isRightClicking = false;
     }
-    // Reset the state
-    removeOverlay();
-    gestureState = 0;
 });

@@ -1,9 +1,24 @@
 chrome.runtime.onMessage.addListener((message, sender) => {
-    if (message.type === "closeTab" && sender.tab?.id) {
-        chrome.tabs.remove(sender.tab.id, () => {
-            if (chrome.runtime.lastError) {
-                console.error("Error occurred when closing a tab.", chrome.runtime.lastError);
-            }
-        });
+    const tabId = sender.tab?.id;
+    if (!tabId) {
+        console.warn("Received message without a valid tab ID.");
+        return;
+    }
+    switch (message.type) {
+        case "closeTab":
+            // console.log("Closing tab with ID:", tabId);
+            chrome.tabs.remove(tabId, () => {
+                if (chrome.runtime.lastError) {
+                    console.error("Error occurred when closing a tab.", chrome.runtime.lastError);
+                }
+            });
+            break;
+        case "newTab":
+            // console.log("Creating a new tab.");
+            chrome.tabs.create({});
+            break;
+        default:
+            console.warn("Received unknown message type:", message.type);
+            break;
     }
 });
