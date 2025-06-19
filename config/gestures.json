@@ -1,11 +1,11 @@
 {
     "1": [
-        { "name": "goForward", "pattern": [3], "action": "goForward" },
-        { "name": "goBack", "pattern": [4], "action": "goBack" }
+        { "name": "goBack", "pattern": [4], "action": "goBack" },
+        { "name": "goForward", "pattern": [3], "action": "goForward" }
     ],
     "2": [
-        { "name": "closeTab", "pattern": [2, 3], "action": "closeTab" },
         { "name": "newTab", "pattern": [1, 3], "action": "newTab" },
+        { "name": "closeTab", "pattern": [2, 3], "action": "closeTab" },
         { "name": "reloadTab", "pattern": [1, 2], "action": "reloadTab" }
     ]
 }
