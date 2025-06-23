@@ -32,7 +32,7 @@ window.addEventListener("mousedown", (e) => {
 
 // Monitor mouse move while right click down
 window.addEventListener("mousemove", (e) => {
-    if (!isRightClicking) return;
+    if (!isRightClicking || gestureBuffer.length >= maxBufferSize) return;
 
     const dx = e.clientX - lastX;
     const dy = e.clientY - lastY;
