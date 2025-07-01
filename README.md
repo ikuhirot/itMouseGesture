@@ -1,4 +1,4 @@
-# itMouseGesture
+# Mouse Gesture Browser Extension
 A simple and safe browser extension that executes actions by recognizing mouse gestures such as right-click and directional movement.
 
 Currently implemented gestures and actions:
